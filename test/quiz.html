@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sample Quiz</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .question-container { margin-bottom: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 5px; position: relative; }
+        .question-text { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
+        .option { margin-bottom: 5px; cursor: pointer; display: block; }
+        .stress-mode-canvas { display: none; }
+        #next-btn { padding: 10px 20px; font-size: 1em; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 5px; margin-top: 10px; }
+        #next-btn:hover { background-color: #0056b3; }
+        .completed { color: green; font-weight: bold; font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <h1>Security Assessment Quiz</h1>
+    
+    <div class="question-container" id="q-container">
+        <div class="question-text" id="qt-text">Loading...</div>
+        <div class="options-list" id="ol-list"></div>
+    </div>
+    
+    <button id="next-btn">Next Question</button>
+
+    <script>
+        const questions = [
+            {
+                type: 'text',
+                q: "What is the primary purpose of Cross-Site Scripting (XSS)?",
+                opts: [
+                    "A) To perform SQL injection",
+                    "B) To execute arbitrary JavaScript in the victim's browser",
+                    "C) To compromise the backend database",
+                    "D) To sniff network traffic"
+                ]
+            },
+            {
+                type: 'text',
+                q: "Which of the following prevents Cross-Site Request Forgery (CSRF)?",
+                opts: [
+                    "A) Anti-CSRF Tokens",
+                    "B) Prepared Statements",
+                    "C) Input Validation",
+                    "D) HTTPS"
+                ]
+            },
+            {
+                type: 'canvas',
+                q: "Which HTTP header defends against Clickjacking?",
+                opts: [
+                    "A) X-XSS-Protection",
+                    "B) Content-Security-Policy",
+                    "C) X-Frame-Options",
+                    "D) Strict-Transport-Security"
+                ]
+            },
+            {
+                type: 'canvas',
+                q: "In what phase of a cyber attack does 'reconnaissance' occur?",
+                opts: [
+                    "A) Exploitation",
+                    "B) Delivery",
+                    "C) Information Gathering",
+                    "D) Maintaining Access"
+                ]
+            }
+        ];
+
+        let currentIndex = 0;
+
+        function loadQuestion(index) {
+            if (index >= questions.length) {
+                document.getElementById('q-container').innerHTML = "<div class='completed' id='qt-text'>Quiz Completed!</div>";
+                document.getElementById('next-btn').style.display = 'none';
+                return;
+            }
+
+            const q = questions[index];
+            const qContainer = document.getElementById('q-container');
+            const urlParams = new URLSearchParams(window.location.search);
+            const isStress = urlParams.get('stress') === 'true';
+
+            // If it's a natively OCR-based question (canvas), OR if we're in stress mode.
+            if (q.type === 'canvas' || isStress) {
+                console.log("Canvas rendering mode activated: forcing OCR fallback...");
+                qContainer.className = "container-xyz123"; // obfuscate container class
+                
+                // We draw the question as an image so DOM text extractors fail completely.
+                // But we inject invisible radio buttons so the AI's "click simulation" still works.
+                let html = `<canvas id="q-canvas" width="600" height="300"></canvas>`;
+                
+                let yPos = 80;
+                q.opts.forEach((optText) => {
+                    const letter = optText.charAt(0);
+                    // Invisible hit-boxes for the Playwright mouse to target
+                    html += `<input type="radio" name="q" id="q_${letter}" style="opacity: 0.01; position: absolute; left: 30px; top: ${yPos - 10}px; width: 20px; height: 20px; z-index: 10;">`;
+                    yPos += 40;
+                });
+                
+                qContainer.innerHTML = html;
+
+                // Draw to canvas
+                const canvas = document.getElementById('q-canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Draw background noise (makes basic scrapers suffer, but OCR handles it)
+                ctx.fillStyle = '#f0f0f0';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                for(let i=0; i<500; i++) {
+                    ctx.fillStyle = `rgba(0,0,0,${Math.random() * 0.1})`;
+                    ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 2, 2);
+                }
+
+                ctx.fillStyle = 'black';
+                ctx.font = 'bold 18px sans-serif';
+                ctx.fillText(q.q, 20, 40);
+                
+                ctx.font = '16px sans-serif';
+                let currentY = 80;
+                q.opts.forEach(optText => {
+                    ctx.beginPath();
+                    ctx.arc(40, currentY - 5, 8, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    ctx.fillText(optText, 60, currentY);
+                    currentY += 40;
+                });
+                
+                // We still need a hidden way for our `waitForQuestionChange` loop to know it changed.
+                // We'll add a hidden metadata div.
+                qContainer.innerHTML += `<div id="q-meta" style="display:none;">${q.q}</div>`;
+
+            } else {
+                // Standard DOM text mode
+                qContainer.className = "question-container";
+                let html = `<div class="question-text" id="qt-text">${q.q}</div>`;
+                html += `<div class="options-list" id="ol-list">`;
+                q.opts.forEach((optText) => {
+                    const letter = optText.charAt(0);
+                    html += `<div class="option" data-val="${letter}"><input type="radio" name="q" id="q_${letter}"><label for="q_${letter}">${optText}</label></div>`;
+                });
+                html += `</div>`;
+                qContainer.innerHTML = html;
+            }
+        }
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            currentIndex++;
+            loadQuestion(currentIndex);
+        });
+
+        // Initial load
+        loadQuestion(currentIndex);
+    </script>
+</body>
+</html>
