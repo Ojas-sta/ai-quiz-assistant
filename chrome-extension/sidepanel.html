@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #1e1e1e; color: #f0f0f0; padding: 16px; margin: 0; }
+    h2 { color: #4caf50; margin-top: 0; }
+    button { background: #4caf50; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 16px; }
+    button:hover { background: #45a049; }
+    input[type="password"], input[type="text"] { width: 100%; padding: 8px; margin-bottom: 16px; box-sizing: border-box; background: #333; color: white; border: 1px solid #555; border-radius: 4px; }
+    .card { background: #2a2a2a; border-radius: 8px; padding: 12px; margin-bottom: 16px; border: 1px solid #444; }
+    .hidden { display: none; }
+    #chat-history { height: 200px; overflow-y: auto; margin-bottom: 12px; font-size: 0.9em; border: 1px solid #444; padding: 8px; border-radius: 4px; background: #222; }
+    #chat-input-container { display: flex; }
+    #chat-input { flex-grow: 1; margin-bottom: 0; margin-right: 8px; }
+    #chat-send { width: auto; margin-bottom: 0; }
+  </style>
+</head>
+<body>
+  <h2>Quiz Assistant</h2>
+  
+  <div id="setup-section">
+    <p style="font-size: 0.9em; color: #ccc;">Please enter your Gemini API Key. It will be stored securely in your browser's local storage.</p>
+    <label for="api-key" style="display:block; margin-bottom: 5px;">Gemini API Key:</label>
+    <input type="password" id="api-key" placeholder="AIzaSy...">
+    <button id="save-key-btn">Save Key</button>
+  </div>
+
+  <div id="main-section" class="hidden">
+    <button id="analyze-btn">Analyze Active Page</button>
+    
+    <div id="result-card" class="card hidden">
+      <p><strong>Suggested Option:</strong> <span id="res-option"></span></p>
+      <p><strong>Confidence:</strong> <span id="res-confidence"></span>%</p>
+      <p style="font-size: 0.9em; color: #aaa;"><strong>Reasoning:</strong><br/><span id="res-reasoning"></span></p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0; font-size: 1em;">Chat</h3>
+      <div id="chat-history"></div>
+      <div id="chat-input-container">
+        <input type="text" id="chat-input" placeholder="Ask follow-up...">
+        <button id="chat-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>

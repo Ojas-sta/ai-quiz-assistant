@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Quiz Assistant",
+  "version": "1.0.0",
+  "description": "An interactive AI assistant that analyzes quiz questions on the current page and provides reasoning.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "sidePanel",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_title": "Open Quiz Assistant"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
