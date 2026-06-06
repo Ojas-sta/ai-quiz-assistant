@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <div id="q-container"></div>
+    <script>
+        const qContainer = document.getElementById('q-container');
+        const q = {
+            q: "Which HTTP header defends against Clickjacking?",
+            opts: [
+                "A) X-XSS-Protection",
+                "B) Content-Security-Policy",
+                "C) X-Frame-Options",
+                "D) Strict-Transport-Security"
+            ]
+        };
+        let html = `<canvas id="q-canvas" width="600" height="300"></canvas>`;
+        let yPos = 80;
+        q.opts.forEach((optText) => {
+            const letter = optText.charAt(0);
+            html += `<input type="radio" name="q" id="q_${letter}" style="opacity: 0.01; position: absolute; left: 30px; top: ${yPos - 10}px; width: 20px; height: 20px; z-index: 10;">`;
+            yPos += 40;
+        });
+        qContainer.innerHTML = html;
+
+        const canvas = document.getElementById('q-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#f0f0f0';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        for(let i=0; i<500; i++) {
+            ctx.fillStyle = `rgba(0,0,0,${Math.random() * 0.1})`;
+            ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 2, 2);
+        }
+        ctx.fillStyle = 'black';
+        ctx.font = 'bold 18px sans-serif';
+        ctx.fillText(q.q, 20, 40);
+        ctx.font = '16px sans-serif';
+        let currentY = 80;
+        q.opts.forEach(optText => {
+            ctx.beginPath();
+            ctx.arc(40, currentY - 5, 8, 0, 2 * Math.PI);
+            ctx.stroke();
+            ctx.fillText(optText, 60, currentY);
+            currentY += 40;
+        });
+    </script>
+</body>
+</html>
