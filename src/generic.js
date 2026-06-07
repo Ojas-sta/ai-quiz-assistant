@@ -54,6 +54,9 @@ async function main() {
         console.log(`✅ Saved keys permanently to ${globalEnvPath}\n`);
     }
 
+    console.log(`[Qalify+] Booting up... please wait 3 seconds.`);
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
     console.log(`[Qalify+] Launching browser to navigate to: ${url}`);
     const browser = await chromium.launch({ headless: false });
     const context = await browser.newContext({ viewport: null });

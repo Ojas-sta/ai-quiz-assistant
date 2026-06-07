@@ -1,6 +1,6 @@
 {
   "name": "@ojas-sta/qalify-plus",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "An advanced, AI-powered educational vulnerability simulator and overlay.",
   "main": "src/generic.js",
   "bin": {
