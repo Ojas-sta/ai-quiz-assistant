@@ -205,6 +205,9 @@ async function main() {
                         '<option value="openrouter/meta-llama/llama-3.2-11b-vision-instruct:free">Llama 3.2 Vision (Free)</option>'
                     ],
                     'gemini': [
+                        '<option value="gemini-3.5-flash">Gemini 3.5 Flash</option>',
+                        '<option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</option>',
+                        '<option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>',
                         '<option value="gemini-2.5-flash">Gemini 2.5 Flash</option>',
                         '<option value="gemini-1.5-pro">Gemini 1.5 Pro</option>'
                     ],
