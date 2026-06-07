@@ -2,9 +2,11 @@ const { GoogleGenAI, Type } = require('@google/genai');
 const { OpenAI } = require('openai');
 
 class AILayer {
-    constructor(modelName = 'gemini-2.5-flash') {
+    constructor(providerName = 'gemini', modelName = 'gemini-2.5-flash') {
+        this.providerName = providerName;
         this.modelName = modelName;
-        this.isOpenRouter = this.modelName.includes('/');
+        this.isOpenRouter = (this.providerName === 'openrouter');
+        this.isPuter = (this.providerName === 'puter');
         
         if (this.isOpenRouter) {
             const key = process.env.OPENROUTER_API_KEY ? process.env.OPENROUTER_API_KEY.trim().replace(/^["']|["']$/g, '') : undefined;
@@ -16,6 +18,9 @@ class AILayer {
                     "X-Title": "Qalify+",
                 }
             });
+            this.chatHistory = [];
+        } else if (this.isPuter) {
+            this.puter = require('@heyputer/puter.js').puter;
             this.chatHistory = [];
         } else {
             const key = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim().replace(/^["']|["']$/g, '') : undefined;
@@ -43,7 +48,38 @@ Return your answer as a structured JSON object. Use exactly these keys:
         try {
             let parsed = null;
 
-            if (this.isOpenRouter) {
+            if (this.isPuter) {
+                const combinedPrompt = `${systemPrompt}\n\n${userPrompt}\nEnsure you output ONLY valid JSON. No markdown formatting.`;
+                let response = await this.puter.ai.chat(combinedPrompt, { model: this.modelName });
+                
+                let resultText = "";
+                if (typeof response === 'string') {
+                    resultText = response;
+                } else if (response && response.message && response.message.content && response.message.content[0]) {
+                    resultText = response.message.content[0].text;
+                } else if (response && response.text) {
+                    resultText = response.text;
+                }
+                
+                let cleanText = resultText.replace(/```json/gi, '').replace(/```/gi, '').trim();
+                
+                try {
+                    const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
+                    else parsed = JSON.parse(cleanText);
+                } catch (e) {
+                    console.log(`[AI] JSON parse failed, attempting heuristic fallback on: ${cleanText.substring(0, 50)}...`);
+                    const optMatch = cleanText.match(/Option\s*([A-D])/i) || cleanText.match(/\b([A-D])\b/);
+                    if (!optMatch) throw new Error(`Model did not return JSON. Raw output: ${cleanText.substring(0, 100)}...`);
+                    parsed = { selectedOption: optMatch[1].toUpperCase(), confidenceScore: 85, reasoning: cleanText };
+                }
+
+                this.chatHistory = [
+                    `Question: ${questionText}\nOptions: ${optionsText.join(', ')}`,
+                    `I chose Option ${parsed.selectedOption} with ${parsed.confidenceScore}% confidence because: ${parsed.reasoning}.`
+                ];
+
+            } else if (this.isOpenRouter) {
                 // OpenRouter API
                 if (!process.env.OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY is missing from .env");
 
@@ -145,8 +181,24 @@ Return your answer as a structured JSON object. Use exactly these keys:
 
     async chat(message) {
         try {
-            console.log(`[AI Chat] Processing message with ${this.modelName}...`);
-            if (this.isOpenRouter) {
+            console.log(`[AI Chat] Processing message with ${this.modelName} via ${this.providerName}...`);
+            if (this.isPuter) {
+                this.chatHistory.push(message);
+                const combinedPrompt = this.chatHistory.join("\n\n");
+                let response = await this.puter.ai.chat(combinedPrompt, { model: this.modelName });
+                
+                let reply = "";
+                if (typeof response === 'string') {
+                    reply = response;
+                } else if (response && response.message && response.message.content && response.message.content[0]) {
+                    reply = response.message.content[0].text;
+                } else if (response && response.text) {
+                    reply = response.text;
+                }
+                
+                this.chatHistory.push(reply);
+                return reply;
+            } else if (this.isOpenRouter) {
                 if (this.chatHistory.length === 0) return "I am not analyzing a question right now.";
                 
                 this.chatHistory.push({ role: "user", content: message });

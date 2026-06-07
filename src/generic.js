@@ -70,8 +70,8 @@ async function main() {
     let currentAILayer = new AILayer();
 
     // 1. Expose a function so the browser UI can trigger the Node.js OCR pipeline
-    await page.exposeFunction('triggerNodeOCR', async (modelName) => {
-        currentAILayer = new AILayer(modelName || 'gemini-2.5-flash');
+    await page.exposeFunction('triggerNodeOCR', async (providerName, modelName) => {
+        currentAILayer = new AILayer(providerName || 'gemini', modelName || 'gemini-2.5-flash');
         console.log(`\n[Overlay] 'Analyze' button clicked! Model: ${currentAILayer.modelName}`);
         
         // Hide the overlay so it isn't captured in the screenshot
@@ -110,8 +110,8 @@ async function main() {
     });
 
     // 1b. Expose a function for DOM text extraction
-    await page.exposeFunction('triggerNodeDOM', async (pageText, modelName) => {
-        currentAILayer = new AILayer(modelName || 'gemini-2.5-flash');
+    await page.exposeFunction('triggerNodeDOM', async (pageText, providerName, modelName) => {
+        currentAILayer = new AILayer(providerName || 'gemini', modelName || 'gemini-2.5-flash');
         console.log(`\n[Overlay] 'Analyze (DOM)' button clicked! Model: ${currentAILayer.modelName}`);
         if (!pageText || pageText.trim() === '') {
             return { error: "No text found in DOM." };
@@ -157,13 +157,13 @@ async function main() {
                 overlay.innerHTML = `
                     <button id="ai-hide-btn" style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; color: #aaa; cursor: pointer; font-size: 16px;">✖</button>
                     <h3 style="margin-top: 0; margin-bottom: 15px; color: #4caf50;">Qalify+ Assistant</h3>
+                    <select id="ai-provider-select" style="width: 100%; height: 36px; padding-left: 8px; margin-bottom: 8px; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 4px; font-size: 14px; box-sizing: border-box; cursor: pointer;">
+                        <option value="openrouter">OpenRouter</option>
+                        <option value="gemini">Google Gemini</option>
+                        <option value="puter">Puter.js (Free Claude)</option>
+                    </select>
                     <select id="ai-model-select" style="width: 100%; height: 36px; padding-left: 8px; margin-bottom: 8px; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 4px; font-size: 14px; box-sizing: border-box; cursor: pointer;">
-                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                        <option value="openrouter/anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Math/Vision)</option>
-                        <option value="openrouter/openai/gpt-4o-mini">GPT-4o Mini (Vision)</option>
-                        <option value="openrouter/google/gemini-pro-1.5">Gemini 1.5 Pro (Vision)</option>
-                        <option value="openrouter/owl-alpha">Owl Alpha (Academia)</option>
-                        <option value="openrouter/qwen/qwen-2.5-coder-32b-instruct">Qwen 2.5 Coder (Logic)</option>
+                        <!-- Options injected by JS -->
                     </select>
                     <button id="ai-analyze-dom-btn" style="width: 100%; padding: 10px; background: #2196F3; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; margin-bottom: 8px;">Analyze Screen (DOM)</button>
                     <button id="ai-analyze-ocr-btn" style="width: 100%; padding: 10px; background: #4caf50; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold;">Analyze Screen (OCR)</button>
@@ -191,22 +191,50 @@ async function main() {
                     overlay.style.display = 'block';
                 });
 
+                const providerSelect = document.getElementById('ai-provider-select');
+                const modelSelect = document.getElementById('ai-model-select');
+                
+                const providerModels = {
+                    'openrouter': [
+                        '<option value="openrouter/anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Math/Vision)</option>',
+                        '<option value="openrouter/openai/gpt-4o-mini">GPT-4o Mini (Vision)</option>',
+                        '<option value="openrouter/google/gemini-pro-1.5">Gemini 1.5 Pro (Vision)</option>',
+                        '<option value="openrouter/owl-alpha">Owl Alpha (Academia)</option>',
+                        '<option value="openrouter/qwen/qwen-2.5-coder-32b-instruct">Qwen 2.5 Coder (Logic)</option>'
+                    ],
+                    'gemini': [
+                        '<option value="gemini-2.5-flash">Gemini 2.5 Flash</option>',
+                        '<option value="gemini-1.5-pro">Gemini 1.5 Pro</option>'
+                    ],
+                    'puter': [
+                        '<option value="claude-sonnet-4-6">Claude Sonnet 4.6</option>',
+                        '<option value="claude-opus-4-8">Claude Opus 4.8</option>',
+                        '<option value="claude-haiku-4-5">Claude Haiku 4.5</option>'
+                    ]
+                };
+
+                providerSelect.addEventListener('change', () => {
+                    modelSelect.innerHTML = providerModels[providerSelect.value].join('');
+                });
+                
+                // Init defaults
+                providerSelect.value = 'openrouter';
+                modelSelect.innerHTML = providerModels['openrouter'].join('');
+
                 // Setup DOM Button
                 document.getElementById('ai-analyze-dom-btn').addEventListener('click', async () => {
                     const resultDiv = document.getElementById('ai-result');
+                    const providerName = providerSelect.value;
+                    const modelName = modelSelect.value;
+                    
                     resultDiv.style.display = 'block';
-                    resultDiv.innerHTML = "<em>Extracting DOM & Analyzing...</em>";
+                    resultDiv.innerHTML = "<em>Analyzing DOM...</em>";
                     document.getElementById('ai-analyze-dom-btn').disabled = true;
                     document.getElementById('ai-analyze-ocr-btn').disabled = true;
 
                     try {
-                        const container = document.getElementById('ai-assistant-container');
-                        container.style.display = 'none';
                         const pageText = document.body.innerText;
-                        container.style.display = 'block';
-
-                        const selectedModel = document.getElementById('ai-model-select').value;
-                        const answer = await window.triggerNodeDOM(pageText, selectedModel);
+                        const answer = await window.triggerNodeDOM(pageText, providerName, modelName);
                         if (answer.error) {
                             resultDiv.innerHTML = `<div style="color: red;">${answer.error}</div>`;
                         } else {
@@ -215,28 +243,28 @@ async function main() {
                                 <p><strong>Confidence:</strong> ${answer.confidenceScore}%</p>
                                 <p style="color: #aaa;"><strong>Reasoning:</strong><br/>${answer.reasoning}</p>
                             `;
+                            document.getElementById('ai-chat-container').style.display = 'block';
                         }
                     } catch (e) {
                         resultDiv.innerHTML = `<div style="color: red;">Error: ${e.message}</div>`;
                     }
                     document.getElementById('ai-analyze-dom-btn').disabled = false;
                     document.getElementById('ai-analyze-ocr-btn').disabled = false;
-                    if (!resultDiv.innerHTML.includes('Error')) {
-                        document.getElementById('ai-chat-container').style.display = 'block';
-                    }
                 });
 
                 // Setup OCR Button
                 document.getElementById('ai-analyze-ocr-btn').addEventListener('click', async () => {
                     const resultDiv = document.getElementById('ai-result');
+                    const providerName = providerSelect.value;
+                    const modelName = modelSelect.value;
+                    
                     resultDiv.style.display = 'block';
                     resultDiv.innerHTML = "<em>Taking screenshot & running OCR...</em>";
                     document.getElementById('ai-analyze-dom-btn').disabled = true;
                     document.getElementById('ai-analyze-ocr-btn').disabled = true;
 
                     try {
-                        const selectedModel = document.getElementById('ai-model-select').value;
-                        const answer = await window.triggerNodeOCR(selectedModel);
+                        const answer = await window.triggerNodeOCR(providerName, modelName);
                         if (answer.error) {
                             resultDiv.innerHTML = `<div style="color: red;">${answer.error}</div>`;
                         } else {
@@ -245,6 +273,7 @@ async function main() {
                                 <p><strong>Confidence:</strong> ${answer.confidenceScore}%</p>
                                 <p style="color: #aaa;"><strong>Reasoning:</strong><br/>${answer.reasoning}</p>
                             `;
+                            document.getElementById('ai-chat-container').style.display = 'block';
                         }
                     } catch (e) {
                         resultDiv.innerHTML = `<div style="color: red;">Error: ${e.message}</div>`;
