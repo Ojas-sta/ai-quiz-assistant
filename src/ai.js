@@ -100,7 +100,7 @@ Return your answer as a structured JSON object. Use exactly these keys:
             return parsed;
         } catch (error) {
             console.error("[AI] Error during reasoning:", error.message);
-            return null;
+            return { error: `API Error: ${error.message}` };
         }
     }
 
@@ -126,7 +126,7 @@ Return your answer as a structured JSON object. Use exactly these keys:
             }
         } catch (error) {
             console.error("[AI Chat] Error:", error.message);
-            return "Sorry, I ran into an error processing that request.";
+            return `<span style="color:red">API Error: ${error.message}</span>`;
         }
     }
 }
