@@ -30,8 +30,21 @@ async function main() {
     await page.exposeFunction('triggerNodeOCR', async (modelName) => {
         currentAILayer = new AILayer(modelName || 'gemini-2.5-flash');
         console.log(`\n[Overlay] 'Analyze' button clicked! Model: ${currentAILayer.modelName}`);
+        
+        // Hide the overlay so it isn't captured in the screenshot
+        await page.evaluate(() => {
+            const container = document.getElementById('ai-assistant-container');
+            if(container) container.style.display = 'none';
+        });
+
         const screenshotPath = path.join(__dirname, '..', 'temp_screenshot.png');
         await page.screenshot({ path: screenshotPath });
+
+        // Bring the overlay back immediately after screenshot
+        await page.evaluate(() => {
+            const container = document.getElementById('ai-assistant-container');
+            if(container) container.style.display = 'block';
+        });
 
         const preprocessedPath = path.join(__dirname, '..', 'temp_preprocessed.png');
         const finalImagePath = await ocrLayer.preprocessImage(screenshotPath, preprocessedPath);
@@ -140,7 +153,11 @@ async function main() {
                     document.getElementById('ai-analyze-ocr-btn').disabled = true;
 
                     try {
+                        const container = document.getElementById('ai-assistant-container');
+                        container.style.display = 'none';
                         const pageText = document.body.innerText;
+                        container.style.display = 'block';
+
                         const selectedModel = document.getElementById('ai-model-select').value;
                         const answer = await window.triggerNodeDOM(pageText, selectedModel);
                         if (answer.error) {
