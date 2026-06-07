@@ -94,8 +94,8 @@ async function main() {
                         <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                         <option value="openrouter/owl-alpha">Owl Alpha (Academia)</option>
                         <option value="openai/gpt-oss-120b">GPT-OSS 120B (Reasoning)</option>
-                        <option value="poolside/laguna-m.1-free">Laguna M.1 (Science/Code)</option>
-                        <option value="qwen/qwen3-coder-480b-a35b">Qwen3 480B (Math)</option>
+                        <option value="poolside/laguna-m.1:free">Laguna M.1 (Science/Code)</option>
+                        <option value="qwen/qwen3-coder:free">Qwen3 480B (Math)</option>
                     </select>
                     <button id="ai-analyze-dom-btn" style="width: 100%; padding: 10px; background: #2196F3; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; margin-bottom: 8px;">Analyze Screen (DOM)</button>
                     <button id="ai-analyze-ocr-btn" style="width: 100%; padding: 10px; background: #4caf50; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold;">Analyze Screen (OCR)</button>
