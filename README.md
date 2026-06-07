@@ -1,5 +1,8 @@
-# Qalify+ & Vulnerability Simulator
+<div align="center">
+  <img src="assets/logo.png" alt="Qalify+ Logo" width="400">
+</div>
 
+# Qalify+ & Vulnerability Simulator
 An educational toolkit demonstrating how modern web quizzes can be analyzed and automated using AI (Gemini 2.5 Flash), DOM extraction, and OCR (Tesseract.js). 
 
 This project explores the security boundaries of online assessments by highlighting how easily DOM-based quizzes can be read, and how even obfuscated (Canvas/Image-based) questions can be bypassed using automated screenshots and Optical Character Recognition (OCR).
