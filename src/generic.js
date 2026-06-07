@@ -84,7 +84,7 @@ async function main() {
 
                 const restoreBtn = document.createElement('button');
                 restoreBtn.id = 'ai-restore-btn';
-                restoreBtn.style.cssText = 'display: none; width: 40px; height: 40px; background: #4caf50; color: white; border: none; cursor: pointer; border-radius: 50%; font-weight: bold; font-size: 18px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); padding: 0; display: flex; align-items: center; justify-content: center;';
+                restoreBtn.style.cssText = 'display: none; width: 40px; height: 40px; background: #4caf50; color: white; border: none; cursor: pointer; border-radius: 50%; font-weight: bold; font-size: 18px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); padding: 0; text-align: center; line-height: 40px;';
                 restoreBtn.innerText = 'o';
 
                 const overlay = document.createElement('div');
@@ -123,7 +123,7 @@ async function main() {
                 // Setup Hide/Show Logic
                 document.getElementById('ai-hide-btn').addEventListener('click', () => {
                     overlay.style.display = 'none';
-                    restoreBtn.style.display = 'flex';
+                    restoreBtn.style.display = 'block';
                 });
                 
                 restoreBtn.addEventListener('click', () => {

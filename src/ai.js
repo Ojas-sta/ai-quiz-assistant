@@ -54,9 +54,28 @@ Return your answer as a structured JSON object. Use exactly these keys:
                 });
                 
                 const resultText = response.choices[0].message.content;
-                // Strip possible markdown
-                const cleanText = resultText.replace(/```json/gi, '').replace(/```/gi, '').trim();
-                parsed = JSON.parse(cleanText);
+                let cleanText = resultText.replace(/```json/gi, '').replace(/```/gi, '').trim();
+                
+                try {
+                    // Try to isolate a JSON block if there's conversational text around it
+                    const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        parsed = JSON.parse(jsonMatch[0]);
+                    } else {
+                        parsed = JSON.parse(cleanText);
+                    }
+                } catch (e) {
+                    // Fallback heuristics if the model completely ignored the JSON prompt
+                    console.log(`[AI] JSON parse failed, attempting heuristic fallback on: ${cleanText.substring(0, 50)}...`);
+                    const optMatch = cleanText.match(/Option\s*([A-D])/i) || cleanText.match(/\b([A-D])\b/);
+                    if (!optMatch) throw new Error(`Model did not return JSON. Raw output: ${cleanText.substring(0, 100)}...`);
+                    
+                    parsed = {
+                        selectedOption: optMatch[1].toUpperCase(),
+                        confidenceScore: 85,
+                        reasoning: cleanText
+                    };
+                }
 
                 // Initialize chat history for OpenRouter
                 this.chatHistory = [
