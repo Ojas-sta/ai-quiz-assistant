@@ -49,9 +49,8 @@ Return your answer as a structured JSON object. Use exactly these keys:
                     model: this.modelName,
                     messages: [
                         { role: "system", content: systemPrompt },
-                        { role: "user", content: userPrompt + "\\nEnsure you output valid JSON." }
-                    ],
-                    response_format: { type: "json_object" }
+                        { role: "user", content: userPrompt + "\nEnsure you output ONLY valid JSON. No markdown formatting." }
+                    ]
                 });
                 
                 const resultText = response.choices[0].message.content;
