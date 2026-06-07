@@ -53,7 +53,7 @@ async function main() {
         console.log(`✅ Saved keys permanently to ${globalEnvPath}\n`);
     }
 
-    console.log(`[Generic] Launching browser to navigate to: ${url}`);
+    console.log(`[Qalify+] Launching browser to navigate to: ${url}`);
     const browser = await chromium.launch({ headless: false });
     const context = await browser.newContext({ viewport: null });
     const page = await context.newPage();
@@ -133,7 +133,7 @@ async function main() {
                 const restoreBtn = document.createElement('button');
                 restoreBtn.id = 'ai-restore-btn';
                 restoreBtn.style.cssText = 'display: none; width: 40px; height: 40px; background: #4caf50; color: white; border: none; cursor: pointer; border-radius: 50%; font-weight: bold; font-size: 18px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); padding: 0; text-align: center; line-height: 40px;';
-                restoreBtn.innerText = 'o';
+                restoreBtn.innerText = 'Q';
 
                 const overlay = document.createElement('div');
                 overlay.id = 'ai-reasoning-overlay';
@@ -145,7 +145,7 @@ async function main() {
                 `;
                 overlay.innerHTML = `
                     <button id="ai-hide-btn" style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; color: #aaa; cursor: pointer; font-size: 16px;">✖</button>
-                    <h3 style="margin-top: 0; margin-bottom: 15px; color: #4caf50;">AI Assistant</h3>
+                    <h3 style="margin-top: 0; margin-bottom: 15px; color: #4caf50;">Qalify+ Assistant</h3>
                     <select id="ai-model-select" style="width: 100%; height: 36px; padding-left: 8px; margin-bottom: 8px; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 4px; font-size: 14px; box-sizing: border-box; cursor: pointer;">
                         <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                         <option value="openrouter/owl-alpha">Owl Alpha (Academia)</option>
@@ -279,13 +279,13 @@ async function main() {
     });
 
     await page.goto(url);
-    console.log("\\n==================================================================");
-    console.log("[Generic] Browser launched. The OCR Overlay has been injected!");
+    console.log("\n==================================================================");
+    console.log("[Qalify+] Browser launched. The Qalify+ Overlay has been injected!");
     console.log("==================================================================");
     console.log("- Click 'Analyze Screen (OCR)' in the browser to run the pipeline.");
     console.log("- Type messages here in the terminal to chat with the AI.");
     console.log("- Type 'exit' to close the simulator.");
-    console.log("==================================================================\\n");
+    console.log("==================================================================\n");
 
     rl.on('line', async (input) => {
         const command = input.trim().toLowerCase();

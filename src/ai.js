@@ -13,7 +13,7 @@ class AILayer {
                 apiKey: key,
                 defaultHeaders: {
                     "HTTP-Referer": "http://localhost",
-                    "X-Title": "AI Quiz Assistant",
+                    "X-Title": "Qalify+",
                 }
             });
             this.chatHistory = [];

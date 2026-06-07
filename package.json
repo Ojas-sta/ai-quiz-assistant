@@ -1,17 +1,21 @@
 {
-  "name": "ai-quiz-assistant",
-  "version": "1.0.4",
-  "description": "An educational vulnerability simulator and AI Assistant overlay for quizzes.",
+  "name": "@ojas-sta/qalify-plus",
+  "version": "1.1.0",
+  "description": "An advanced, AI-powered educational vulnerability simulator and overlay.",
   "main": "src/generic.js",
   "bin": {
-    "ai-quiz-assistant": "./src/generic.js",
-    "ai-quiz-simulator": "./src/main.js"
+    "qalify": "./src/generic.js",
+    "qalify-simulator": "./src/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ojas-sta/ai-quiz-assistant.git"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Ojas-sta",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {

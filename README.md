@@ -1,4 +1,4 @@
-# AI Quiz Assistant & Vulnerability Simulator
+# Qalify+ & Vulnerability Simulator
 
 An educational toolkit demonstrating how modern web quizzes can be analyzed and automated using AI (Gemini 2.5 Flash), DOM extraction, and OCR (Tesseract.js). 
 
@@ -57,7 +57,7 @@ You do not need to download the code to use the assistant! It has been published
 3. **Run the universal command:**
    Open your terminal and type:
    ```bash
-   npx ai-quiz-assistant@latest https://google.com
+   npx @ojas-sta/qalify-plus@latest https://google.com
    ```
 4. **Interactive Setup:** On your very first run, the tool will automatically pause and ask you to paste the API keys you generated above. It securely saves them so you never have to enter them again!
 
@@ -66,10 +66,10 @@ You do not need to download the code to use the assistant! It has been published
 ## 🕹️ Usage Guide
 
 ### Mode 1: The Universal UI Overlay (Recommended)
-This mode launches a custom browser, navigates to a URL you specify, and injects our custom AI Assistant overlay into the page.
+This mode launches a custom browser, navigates to a URL you specify, and injects our custom Qalify+ overlay into the page.
 
 ```bash
-npx ai-quiz-assistant@latest "https://example-quiz-site.com/login"
+npx @ojas-sta/qalify-plus@latest "https://example-quiz-site.com/login"
 ```
 *   **How to use:** Navigate the browser manually (log in, pass captchas, etc.). When a question is on screen, click either the **DOM** or **OCR** analyze buttons in the floating overlay.
 *   **Chat:** After an analysis, a chat window will slide down allowing you to interrogate the AI about its answer.
