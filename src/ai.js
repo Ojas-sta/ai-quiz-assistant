@@ -133,12 +133,25 @@ Return your answer as a structured JSON object. Use exactly these keys:
                 // Initialize chat history for OpenRouter
                 this.chatHistory = [
                     { role: "system", content: systemPrompt },
-                    { role: "user", content: `Question: ${questionText}\\nOptions: ${optionsText.join(', ')}` },
+                    { role: "user", content: `Question: ${questionText}\nOptions: ${optionsText.join(', ')}` },
                     { role: "assistant", content: `I chose Option ${parsed.selectedOption} with ${parsed.confidenceScore}% confidence because: ${parsed.reasoning}.` }
                 ];
 
             } else {
                 // Google Gemini API natively
+                if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is missing from .env");
+
+                if (base64Image) {
+                    // Use the new Standalone Multimodal Pipeline!
+                    const GeminiPipeline = require('./gemini-pipeline');
+                    const pipeline = new GeminiPipeline();
+                    
+                    const questionHint = `Question: ${questionText}\nOptions: ${optionsText.join(', ')}`;
+                    parsed = await pipeline.execute(base64Image, questionHint, this.modelName);
+                    
+                    this.chatSession = null; // No chat session maintained for raw pipeline yet
+                    return parsed;
+                }
                 const responseSchema = {
                     type: Type.OBJECT,
                     properties: {
