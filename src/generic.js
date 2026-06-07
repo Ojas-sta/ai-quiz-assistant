@@ -167,7 +167,7 @@ async function main() {
                     </select>
                     <button id="ai-analyze-dom-btn" style="width: 100%; padding: 10px; background: #2196F3; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; margin-bottom: 8px;">Analyze Screen (DOM)</button>
                     <button id="ai-analyze-ocr-btn" style="width: 100%; padding: 10px; background: #4caf50; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold;">Analyze Screen (OCR)</button>
-                    <div id="ai-result" style="margin-top: 15px; font-size: 0.9em; display: none;"></div>
+                    <div id="ai-result" style="margin-top: 15px; font-size: 0.9em; display: none; max-height: 400px; overflow-y: auto; padding-right: 5px;"></div>
                     <div id="ai-chat-container" style="margin-top: 15px; display: none; border-top: 1px solid #444; padding-top: 10px;">
                         <div id="ai-chat-log" style="max-height: 150px; overflow-y: auto; margin-bottom: 10px; font-size: 0.85em; display: flex; flex-direction: column; gap: 8px;"></div>
                         <div style="display: flex; gap: 5px;">
@@ -199,8 +199,10 @@ async function main() {
                         '<option value="openrouter/anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Math/Vision)</option>',
                         '<option value="openrouter/openai/gpt-4o-mini">GPT-4o Mini (Vision)</option>',
                         '<option value="openrouter/google/gemini-pro-1.5">Gemini 1.5 Pro (Vision)</option>',
-                        '<option value="openrouter/owl-alpha">Owl Alpha (Academia)</option>',
-                        '<option value="openrouter/qwen/qwen-2.5-coder-32b-instruct">Qwen 2.5 Coder (Logic)</option>'
+                        '<option value="openrouter/owl-alpha" selected>Owl Alpha (Academia Free)</option>',
+                        '<option value="openrouter/qwen/qwen-2.5-coder-32b-instruct">Qwen 2.5 Coder (Logic)</option>',
+                        '<option value="openrouter/google/gemma-2-9b-it:free">Gemma 2 9B (Free)</option>',
+                        '<option value="openrouter/meta-llama/llama-3.2-11b-vision-instruct:free">Llama 3.2 Vision (Free)</option>'
                     ],
                     'gemini': [
                         '<option value="gemini-2.5-flash">Gemini 2.5 Flash</option>',
