@@ -28,9 +28,12 @@ async function main() {
     // Check for API Keys
     if (!process.env.GEMINI_API_KEY && !process.env.OPENROUTER_API_KEY) {
         console.log("\n❌ No API keys found. Let's set them up globally!");
-        const geminiKey = await new Promise(resolve => rl.question("Enter your Gemini API Key (or press Enter to skip): ", resolve));
-        const openRouterKey = await new Promise(resolve => rl.question("Enter your OpenRouter API Key (or press Enter to skip): ", resolve));
+        let geminiKey = await new Promise(resolve => rl.question("Enter your Gemini API Key (or press Enter to skip): ", resolve));
+        let openRouterKey = await new Promise(resolve => rl.question("Enter your OpenRouter API Key (or press Enter to skip): ", resolve));
         
+        geminiKey = geminiKey ? geminiKey.trim().replace(/^["']|["']$/g, '') : '';
+        openRouterKey = openRouterKey ? openRouterKey.trim().replace(/^["']|["']$/g, '') : '';
+
         if (!geminiKey && !openRouterKey) {
             console.error("You must provide at least one API key. Exiting.");
             process.exit(1);

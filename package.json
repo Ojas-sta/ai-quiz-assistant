@@ -1,6 +1,6 @@
 {
   "name": "ai-quiz-assistant",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "An educational vulnerability simulator and AI Assistant overlay for quizzes.",
   "main": "src/generic.js",
   "bin": {

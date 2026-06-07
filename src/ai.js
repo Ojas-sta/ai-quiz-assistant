@@ -7,9 +7,10 @@ class AILayer {
         this.isOpenRouter = this.modelName.includes('/');
         
         if (this.isOpenRouter) {
+            const key = process.env.OPENROUTER_API_KEY ? process.env.OPENROUTER_API_KEY.trim().replace(/^["']|["']$/g, '') : undefined;
             this.openRouter = new OpenAI({
                 baseURL: "https://openrouter.ai/api/v1",
-                apiKey: process.env.OPENROUTER_API_KEY,
+                apiKey: key,
                 defaultHeaders: {
                     "HTTP-Referer": "http://localhost",
                     "X-Title": "AI Quiz Assistant",
@@ -17,7 +18,8 @@ class AILayer {
             });
             this.chatHistory = [];
         } else {
-            this.ai = new GoogleGenAI({});
+            const key = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim().replace(/^["']|["']$/g, '') : undefined;
+            this.ai = new GoogleGenAI({ apiKey: key });
             this.chatSession = null;
         }
     }
