@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/logo.png" alt="Qalify+ Logo" width="400">
+  <img src="logo.png" alt="Qalify+ Logo" width="400">
 </div>
 
 # Qalify+ & Vulnerability Simulator
