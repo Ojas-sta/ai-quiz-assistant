@@ -1,69 +1,102 @@
 const { GoogleGenAI, Type } = require('@google/genai');
+const { OpenAI } = require('openai');
 
 class AILayer {
-    constructor() {
-        this.ai = new GoogleGenAI({});
-        this.chatSession = null;
+    constructor(modelName = 'gemini-2.5-flash') {
+        this.modelName = modelName;
+        this.isOpenRouter = this.modelName.includes('/');
+        
+        if (this.isOpenRouter) {
+            this.openRouter = new OpenAI({
+                baseURL: "https://openrouter.ai/api/v1",
+                apiKey: process.env.OPENROUTER_API_KEY,
+                defaultHeaders: {
+                    "HTTP-Referer": "http://localhost",
+                    "X-Title": "AI Quiz Assistant",
+                }
+            });
+            this.chatHistory = [];
+        } else {
+            this.ai = new GoogleGenAI({});
+            this.chatSession = null;
+        }
     }
 
     async determineAnswer(questionText, optionsText) {
-        console.log("[AI] Analyzing question and options...");
-        const prompt = `
-You are an expert taking a quiz.
+        console.log(`[AI] Analyzing question using model: ${this.modelName}...`);
+        
+        const systemPrompt = "You are an expert educational assistant taking a quiz. Apply deep reasoning and academic rigor.";
+        const userPrompt = `
 Question: ${questionText}
 Options:
-${optionsText.join('\n')}
+${optionsText.join('\\n')}
 
 Based on your knowledge, please select the most correct option.
-Return a structured output with the following fields:
+Return your answer as a structured JSON object. Use exactly these keys:
 - "selectedOption": Only the letter (A, B, C, or D) corresponding to your answer.
 - "confidenceScore": An integer from 0 to 100 representing your confidence.
 - "reasoning": A brief explanation of why this option is correct.
 `;
 
-        const responseSchema = {
-            type: Type.OBJECT,
-            properties: {
-                selectedOption: {
-                    type: Type.STRING,
-                    description: "The letter of the selected option, e.g., A, B, C, or D",
-                },
-                confidenceScore: {
-                    type: Type.INTEGER,
-                    description: "A score from 0 to 100 indicating confidence in the answer.",
-                },
-                reasoning: {
-                    type: Type.STRING,
-                    description: "Brief reasoning for why this answer was chosen.",
-                },
-            },
-            required: ["selectedOption", "confidenceScore", "reasoning"],
-        };
-
         try {
-            const response = await this.ai.models.generateContent({
-                model: 'gemini-2.5-flash',
-                contents: prompt,
-                config: {
-                    responseMimeType: "application/json",
-                    responseSchema: responseSchema,
-                }
-            });
+            let parsed = null;
 
-            const resultText = response.text;
-            const parsed = JSON.parse(resultText);
+            if (this.isOpenRouter) {
+                // OpenRouter API
+                if (!process.env.OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY is missing from .env");
 
-            // Initialize a chat session for follow-ups about this question
-            this.chatSession = this.ai.chats.create({
-                model: 'gemini-2.5-flash',
-                config: {
-                    systemInstruction: `You are a helpful AI security expert taking a quiz. The user is asking you follow-up questions about your reasoning. 
-Current Question: ${questionText}
-Options: ${optionsText.join(', ')}
-You chose Option ${parsed.selectedOption} with ${parsed.confidenceScore}% confidence because: ${parsed.reasoning}.
-Keep your responses concise, friendly, and educational.`
-                }
-            });
+                const response = await this.openRouter.chat.completions.create({
+                    model: this.modelName,
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: userPrompt + "\\nEnsure you output valid JSON." }
+                    ],
+                    response_format: { type: "json_object" }
+                });
+                
+                const resultText = response.choices[0].message.content;
+                // Strip possible markdown
+                const cleanText = resultText.replace(/```json/gi, '').replace(/```/gi, '').trim();
+                parsed = JSON.parse(cleanText);
+
+                // Initialize chat history for OpenRouter
+                this.chatHistory = [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: `Question: ${questionText}\\nOptions: ${optionsText.join(', ')}` },
+                    { role: "assistant", content: `I chose Option ${parsed.selectedOption} with ${parsed.confidenceScore}% confidence because: ${parsed.reasoning}.` }
+                ];
+
+            } else {
+                // Google Gemini API natively
+                const responseSchema = {
+                    type: Type.OBJECT,
+                    properties: {
+                        selectedOption: { type: Type.STRING },
+                        confidenceScore: { type: Type.INTEGER },
+                        reasoning: { type: Type.STRING }
+                    },
+                    required: ["selectedOption", "confidenceScore", "reasoning"],
+                };
+
+                const response = await this.ai.models.generateContent({
+                    model: this.modelName,
+                    contents: userPrompt,
+                    config: {
+                        responseMimeType: "application/json",
+                        responseSchema: responseSchema,
+                    }
+                });
+
+                parsed = JSON.parse(response.text);
+
+                // Initialize chat session for Gemini
+                this.chatSession = this.ai.chats.create({
+                    model: this.modelName,
+                    config: {
+                        systemInstruction: `You are an AI taking a quiz. You chose Option ${parsed.selectedOption} because: ${parsed.reasoning}.`
+                    }
+                });
+            }
 
             return parsed;
         } catch (error) {
@@ -73,13 +106,25 @@ Keep your responses concise, friendly, and educational.`
     }
 
     async chat(message) {
-        if (!this.chatSession) {
-            return "I am not analyzing a question right now.";
-        }
         try {
-            console.log(`[AI Chat] Processing message...`);
-            const response = await this.chatSession.sendMessage({ message });
-            return response.text;
+            console.log(`[AI Chat] Processing message with ${this.modelName}...`);
+            if (this.isOpenRouter) {
+                if (this.chatHistory.length === 0) return "I am not analyzing a question right now.";
+                
+                this.chatHistory.push({ role: "user", content: message });
+                const response = await this.openRouter.chat.completions.create({
+                    model: this.modelName,
+                    messages: this.chatHistory
+                });
+                
+                const reply = response.choices[0].message.content;
+                this.chatHistory.push({ role: "assistant", content: reply });
+                return reply;
+            } else {
+                if (!this.chatSession) return "I am not analyzing a question right now.";
+                const response = await this.chatSession.sendMessage({ message });
+                return response.text;
+            }
         } catch (error) {
             console.error("[AI Chat] Error:", error.message);
             return "Sorry, I ran into an error processing that request.";

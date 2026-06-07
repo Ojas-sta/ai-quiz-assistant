@@ -23,11 +23,12 @@ async function main() {
     const page = await context.newPage();
 
     const ocrLayer = new OCRLayer();
-    const aiLayer = new AILayer();
+    let currentAILayer = new AILayer();
 
     // 1. Expose a function so the browser UI can trigger the Node.js OCR pipeline
-    await page.exposeFunction('triggerNodeOCR', async () => {
-        console.log("\n[Overlay] 'Analyze' button clicked! Taking screenshot...");
+    await page.exposeFunction('triggerNodeOCR', async (modelName) => {
+        currentAILayer = new AILayer(modelName || 'gemini-2.5-flash');
+        console.log(`\n[Overlay] 'Analyze' button clicked! Model: ${currentAILayer.modelName}`);
         const screenshotPath = path.join(__dirname, '..', 'temp_screenshot.png');
         await page.screenshot({ path: screenshotPath });
 
@@ -40,26 +41,27 @@ async function main() {
             return { error: "OCR failed to extract clear text." };
         } else {
             console.log(`\n--- Extracted OCR Text ---\n${ocrResult.question}`);
-            const answer = await aiLayer.determineAnswer(ocrResult.question, ocrResult.options);
+            const answer = await currentAILayer.determineAnswer(ocrResult.question, ocrResult.options);
             return answer || { error: "AI failed to generate an answer." };
         }
     });
 
     // 1b. Expose a function for DOM text extraction
-    await page.exposeFunction('triggerNodeDOM', async (pageText) => {
-        console.log("\n[Overlay] 'Analyze (DOM)' button clicked!");
+    await page.exposeFunction('triggerNodeDOM', async (pageText, modelName) => {
+        currentAILayer = new AILayer(modelName || 'gemini-2.5-flash');
+        console.log(`\n[Overlay] 'Analyze (DOM)' button clicked! Model: ${currentAILayer.modelName}`);
         if (!pageText || pageText.trim() === '') {
             return { error: "No text found in DOM." };
         }
         console.log(`\n--- Extracted DOM Text ---\n${pageText.substring(0, 300)}...`);
         // We pass the raw text as the question and an empty array for options.
-        const answer = await aiLayer.determineAnswer(pageText.substring(0, 5000), []);
+        const answer = await currentAILayer.determineAnswer(pageText.substring(0, 5000), []);
         return answer || { error: "AI failed to generate an answer." };
     });
 
     // 1c. Expose a function for Chat interaction
     await page.exposeFunction('triggerNodeChat', async (message) => {
-        return await aiLayer.chat(message);
+        return await currentAILayer.chat(message);
     });
 
     // 2. Inject the UI overlay every time the page finishes loading or navigating
@@ -78,6 +80,13 @@ async function main() {
                 `;
                 overlay.innerHTML = `
                     <h3 style="margin-top: 0; color: #4caf50;">AI Assistant</h3>
+                    <select id="ai-model-select" style="width: 100%; padding: 8px; margin-bottom: 8px; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 4px;">
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                        <option value="openrouter/owl-alpha">Owl Alpha (Academia)</option>
+                        <option value="openai/gpt-oss-120b">GPT-OSS 120B (Reasoning)</option>
+                        <option value="poolside/laguna-m.1-free">Laguna M.1 (Science/Code)</option>
+                        <option value="qwen/qwen3-coder-480b-a35b">Qwen3 480B (Math)</option>
+                    </select>
                     <button id="ai-analyze-dom-btn" style="width: 100%; padding: 10px; background: #2196F3; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; margin-bottom: 8px;">Analyze Screen (DOM)</button>
                     <button id="ai-analyze-ocr-btn" style="width: 100%; padding: 10px; background: #4caf50; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold;">Analyze Screen (OCR)</button>
                     <div id="ai-result" style="margin-top: 15px; font-size: 0.9em; display: none;"></div>
@@ -101,7 +110,8 @@ async function main() {
 
                     try {
                         const pageText = document.body.innerText;
-                        const answer = await window.triggerNodeDOM(pageText);
+                        const selectedModel = document.getElementById('ai-model-select').value;
+                        const answer = await window.triggerNodeDOM(pageText, selectedModel);
                         if (answer.error) {
                             resultDiv.innerHTML = `<div style="color: red;">${answer.error}</div>`;
                         } else {
@@ -130,7 +140,8 @@ async function main() {
                     document.getElementById('ai-analyze-ocr-btn').disabled = true;
 
                     try {
-                        const answer = await window.triggerNodeOCR();
+                        const selectedModel = document.getElementById('ai-model-select').value;
+                        const answer = await window.triggerNodeOCR(selectedModel);
                         if (answer.error) {
                             resultDiv.innerHTML = `<div style="color: red;">${answer.error}</div>`;
                         } else {
@@ -201,7 +212,7 @@ async function main() {
             process.exit(0);
         } else if (command !== '') {
             console.log(`\\n[You]: ${input}`);
-            const response = await aiLayer.chat(input);
+            const response = await currentAILayer.chat(input);
             console.log(`[AI]: ${response}\\n`);
         }
     });
