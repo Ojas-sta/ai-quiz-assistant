@@ -83,20 +83,27 @@ Return your answer as a structured JSON object. Use exactly these keys:
                 // OpenRouter API
                 if (!process.env.OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY is missing from .env");
 
-                let userMessageContent = userPrompt + "\nEnsure you output ONLY valid JSON. No markdown formatting.";
-                if (base64Image) {
-                    userMessageContent = [
-                        { type: "text", text: userMessageContent },
-                        { type: "image_url", image_url: { url: `data:image/png;base64,${base64Image}` } }
-                    ];
+                const messages = [
+                    { role: "system", content: systemPrompt }
+                ];
+
+                const supportsVision = /sonnet|gpt-4o|gemini|vision/i.test(this.modelName);
+
+                if (base64Image && supportsVision) {
+                    messages.push({
+                        role: "user",
+                        content: [
+                            { type: "text", text: userPrompt + "\nEnsure you output ONLY valid JSON. No markdown formatting." },
+                            { type: "image_url", image_url: { url: `data:image/png;base64,${base64Image}` } }
+                        ]
+                    });
+                } else {
+                    messages.push({ role: "user", content: userPrompt + "\nEnsure you output ONLY valid JSON. No markdown formatting." });
                 }
 
                 const response = await this.openRouter.chat.completions.create({
                     model: this.modelName,
-                    messages: [
-                        { role: "system", content: systemPrompt },
-                        { role: "user", content: userMessageContent }
-                    ]
+                    messages: messages
                 });
                 
                 const resultText = response.choices[0].message.content;
