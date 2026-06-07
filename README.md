@@ -18,8 +18,9 @@ This project explores the security boundaries of online assessments by highlight
 *   **Multi-Model Support:** Integrates with both Google Gemini and OpenRouter, allowing you to seamlessly swap between models optimized for math (Qwen), academia (Owl Alpha), or coding (Laguna).
 *   **Native Markdown Rendering:** Chat bubbles and reasoning outputs natively parse LLM Markdown into clean HTML (bolding, lists, code blocks).
 *   **Anti-Inception Capture:** The UI overlay automatically hides itself in a fraction of a millisecond during screen capture to prevent the AI from "reading" its own UI elements.
+*   **Terminal ASCII Art & Delay:** Features a sleek boot-up ASCII banner and a 3-second safety delay before the browser launches.
 *   **Chrome Extension Version:** A lightweight Manifest V3 Chrome Extension version of the DOM analyzer, ready for unlisted publishing.
-*   **Local Autonomous Loop (`src/main.js`):** An automated loop that navigates a local test quiz, continuously identifying questions, selecting the best AI-determined answer, and auto-clicking the "Next" button.
+*   **Local Autonomous Loop:** An automated loop that navigates a local test quiz, continuously identifying questions, selecting the best AI-determined answer, and auto-clicking the "Next" button.
 
 ---
 
@@ -89,9 +90,11 @@ A lightweight version you can install directly into your primary Chrome browser.
 ### Mode 3: The Autonomous Local Simulator
 This runs an aggressive automated bot against a local test file (`test/quiz.html`). It auto-detects questions, selects radio buttons, and advances to the next page entirely on its own.
 
+You can run this globally using the secondary executable we packaged:
 ```bash
-node src/main.js
+npx @ojas-sta/qalify-plus@latest qalify-simulator
 ```
+*(Or, if you cloned the repository locally, just run `node src/main.js`)*
 
 ---
 
