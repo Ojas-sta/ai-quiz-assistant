@@ -5,6 +5,7 @@ const fs = require('fs');
 
 const globalEnvPath = path.join(os.homedir(), '.ai-quiz-assistant.env');
 require('dotenv').config();
+require('./banner');
 require('dotenv').config({ path: globalEnvPath }); // Load global keys if they exist
 
 const { chromium } = require('playwright');
@@ -278,29 +279,7 @@ async function main() {
         }
     });
 
-    const ASCII_ART = `
-                           █░ ▓ ░▒ ▒█                                                                                                                                          
-                        ▓▒▓          ▒▒▒                                                                                                                                       
-                       ▓    ▒      ░    ▓                                                                                                                                      
-                      ▒      █░  ▒█      ▓                                                                                                                                     
-                     █         ░          ▓        ░▓███████▓░                ██▒  ▒██    ▒████▒                                                                               
-                          ▒  ▓    ▓  ░    ░       ▒██▒░░░░░▒██▓               ██▒         ██▒                                                                                  
-                     █ ▓  ▓▓        ▓▓  ▒ ▓       ▓██       ███   ███████▓    ██▒  ░██  ███████▒ ██▒    ▓██     ▓█▓                                                            
-                     ██░   ░░      ▒    ░▒▒       ▓██       ███         ▓██   ██▒  ░██    ██▓    ▒██    ██░     ▓█▓                                                            
-                      ▓     ▓      ▒ ░   ▓        ▓██       ███    ▒▓▓▓▓███   ██▒  ░██    ██▒     ███  ██▓   █████████                                                         
-                       ▓ ▓   ░    ▒   ▒░▓         ▓██       ███  ███░░░░▓██   ██▒  ░██    ██▒      ██▒▓██       ▓█▓                                                            
-                        ▓ ▓  ▒ ██ ░  ▒ ▒          ▓██       ██▓  ███    ▒██   ██▒  ░██    ██▒       ████        ▓█▓                                                            
-                         ▓       ░    ▒            ▓█████████▓    ██████▒██   ██▒  ░██    ██▒        ██                                                                        
-                          ▓      ░   ▒                    ██▓                                       ██▓                                                                        
-                           ▒     ░  ▒                      ██▓                                     ██▓                                                                         
-                           ▓      ▓▓▒                                                                                                                                          
-                           ▓  ▒▒    ▒                                                                                                                                          
-                           ░▒▓▒▒▒▒▓▒                                                                                                                                           
-                              ▓▓▓▓
-`;
-
     await page.goto(url);
-    console.log(ASCII_ART);
     console.log("\n==================================================================");
     console.log("[Qalify+] Browser launched. The Qalify+ Overlay has been injected!");
     console.log("==================================================================");

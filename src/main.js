@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 require('dotenv').config();
+require('./banner');
 const path = require('path');
 const BrowserLayer = require('./browser');
 const OCRLayer = require('./ocr');
