@@ -1,13 +1,11 @@
 #!/usr/bin/env node
-require('dotenv').config();
+const os = require('os');
+const path = require('path');
+const fs = require('fs');
 
-if (!process.env.GEMINI_API_KEY && !process.env.OPENROUTER_API_KEY) {
-    console.error("\n❌ Error: No API keys found in environment.");
-    console.error("If you are running this globally via npx or npm, you must pass the key inline:");
-    console.error("Example: GEMINI_API_KEY=your_key_here npx ai-quiz-assistant https://example.com");
-    console.error("Or create a .env file in the directory where you run the command.\n");
-    process.exit(1);
-}
+const globalEnvPath = path.join(os.homedir(), '.ai-quiz-assistant.env');
+require('dotenv').config();
+require('dotenv').config({ path: globalEnvPath }); // Load global keys if they exist
 
 const { chromium } = require('playwright');
 const readline = require('readline');
@@ -26,6 +24,31 @@ async function main() {
     if (!url) {
         console.error("Usage: node src/generic.js <URL>");
         process.exit(1);
+    }
+
+    // Check for API Keys
+    if (!process.env.GEMINI_API_KEY && !process.env.OPENROUTER_API_KEY) {
+        console.log("\n❌ No API keys found. Let's set them up globally!");
+        const geminiKey = await new Promise(resolve => rl.question("Enter your Gemini API Key (or press Enter to skip): ", resolve));
+        const openRouterKey = await new Promise(resolve => rl.question("Enter your OpenRouter API Key (or press Enter to skip): ", resolve));
+        
+        if (!geminiKey && !openRouterKey) {
+            console.error("You must provide at least one API key. Exiting.");
+            process.exit(1);
+        }
+
+        let envContent = '';
+        if (geminiKey) {
+            envContent += `GEMINI_API_KEY=${geminiKey}\n`;
+            process.env.GEMINI_API_KEY = geminiKey;
+        }
+        if (openRouterKey) {
+            envContent += `OPENROUTER_API_KEY=${openRouterKey}\n`;
+            process.env.OPENROUTER_API_KEY = openRouterKey;
+        }
+
+        fs.writeFileSync(globalEnvPath, envContent);
+        console.log(`✅ Saved keys permanently to ${globalEnvPath}\n`);
     }
 
     console.log(`[Generic] Launching browser to navigate to: ${url}`);
