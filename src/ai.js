@@ -24,7 +24,7 @@ class AILayer {
         }
     }
 
-    async determineAnswer(questionText, optionsText) {
+    async determineAnswer(questionText, optionsText, base64Image = null) {
         console.log(`[AI] Analyzing question using model: ${this.modelName}...`);
         
         const systemPrompt = "You are an expert educational assistant taking a quiz. Apply deep reasoning and academic rigor.";
@@ -47,11 +47,19 @@ Return your answer as a structured JSON object. Use exactly these keys:
                 // OpenRouter API
                 if (!process.env.OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY is missing from .env");
 
+                let userMessageContent = userPrompt + "\nEnsure you output ONLY valid JSON. No markdown formatting.";
+                if (base64Image) {
+                    userMessageContent = [
+                        { type: "text", text: userMessageContent },
+                        { type: "image_url", image_url: { url: `data:image/png;base64,${base64Image}` } }
+                    ];
+                }
+
                 const response = await this.openRouter.chat.completions.create({
                     model: this.modelName,
                     messages: [
                         { role: "system", content: systemPrompt },
-                        { role: "user", content: userPrompt + "\nEnsure you output ONLY valid JSON. No markdown formatting." }
+                        { role: "user", content: userMessageContent }
                     ]
                 });
                 
@@ -98,9 +106,19 @@ Return your answer as a structured JSON object. Use exactly these keys:
                     required: ["selectedOption", "confidenceScore", "reasoning"],
                 };
 
+                let reqContents = [userPrompt];
+                if (base64Image) {
+                    reqContents.push({
+                        inlineData: {
+                            data: base64Image,
+                            mimeType: "image/png"
+                        }
+                    });
+                }
+
                 const response = await this.ai.models.generateContent({
                     model: this.modelName,
-                    contents: userPrompt,
+                    contents: reqContents,
                     config: {
                         responseMimeType: "application/json",
                         responseSchema: responseSchema,

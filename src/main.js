@@ -73,10 +73,16 @@ async function main() {
                 }
             }
 
-            let aiOutput = null;
+            let base64Image = null;
+            if (extractionMethod === 'OCR') {
+                const fs = require('fs');
+                const finalImagePath = path.resolve(__dirname, '../processed_screenshot.png');
+                base64Image = fs.readFileSync(finalImagePath, { encoding: 'base64' });
+            }
+
             // 3. AI Reasoning Layer
             if (extractedData && extractedData.question) {
-                aiOutput = await aiLayer.determineAnswer(extractedData.question, extractedData.options);
+                aiOutput = await aiLayer.determineAnswer(extractedData.question, extractedData.options, base64Image);
                 if (aiOutput) {
                     console.log(`[AI] Selected Option: ${aiOutput.selectedOption} (${aiOutput.confidenceScore}% confidence)`);
                     

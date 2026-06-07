@@ -98,7 +98,10 @@ async function main() {
             return { error: "OCR failed to extract clear text." };
         } else {
             console.log(`\n--- Extracted OCR Text ---\n${ocrResult.question}`);
-            const answer = await currentAILayer.determineAnswer(ocrResult.question, ocrResult.options);
+            // Read the image as base64 to pass it to multimodal models
+            const base64Image = fs.readFileSync(finalImagePath, { encoding: 'base64' });
+
+            const answer = await currentAILayer.determineAnswer(ocrResult.question, ocrResult.options, base64Image);
             if (answer && answer.reasoning) {
                 answer.reasoning = marked.parse(answer.reasoning);
             }
@@ -156,10 +159,11 @@ async function main() {
                     <h3 style="margin-top: 0; margin-bottom: 15px; color: #4caf50;">Qalify+ Assistant</h3>
                     <select id="ai-model-select" style="width: 100%; height: 36px; padding-left: 8px; margin-bottom: 8px; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 4px; font-size: 14px; box-sizing: border-box; cursor: pointer;">
                         <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                        <option value="openrouter/anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Math/Vision)</option>
+                        <option value="openrouter/openai/gpt-4o-mini">GPT-4o Mini (Vision)</option>
+                        <option value="openrouter/google/gemini-pro-1.5">Gemini 1.5 Pro (Vision)</option>
                         <option value="openrouter/owl-alpha">Owl Alpha (Academia)</option>
-                        <option value="openai/gpt-oss-120b">GPT-OSS 120B (Reasoning)</option>
-                        <option value="poolside/laguna-m.1:free">Laguna M.1 (Science/Code)</option>
-                        <option value="qwen/qwen3-coder:free">Qwen3 480B (Math)</option>
+                        <option value="openrouter/qwen/qwen-2.5-coder-32b-instruct">Qwen 2.5 Coder (Logic)</option>
                     </select>
                     <button id="ai-analyze-dom-btn" style="width: 100%; padding: 10px; background: #2196F3; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; margin-bottom: 8px;">Analyze Screen (DOM)</button>
                     <button id="ai-analyze-ocr-btn" style="width: 100%; padding: 10px; background: #4caf50; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold;">Analyze Screen (OCR)</button>
