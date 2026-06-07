@@ -11,7 +11,10 @@ This project explores the security boundaries of online assessments by highlight
 *   **Generic Playwright Overlay (`src/generic.js`):** Injects a sleek, interactive dark-mode UI overlay into **any** website you visit. It provides dual-mode extraction:
     *   **Analyze (DOM):** Instantly extracts the text from standard HTML web pages.
     *   **Analyze (OCR):** Takes a background screenshot, sharpens the image, and runs it through Tesseract.js to defeat anti-scraping canvas/image obfuscation.
-*   **Interactive AI Chatbot:** After extracting a question, the UI allows you to chat directly with Gemini to ask follow-up questions or have it explain its reasoning.
+*   **Interactive AI Chatbot:** After extracting a question, the UI allows you to chat directly with the AI to ask follow-up questions or have it explain its reasoning.
+*   **Multi-Model Support:** Integrates with both Google Gemini and OpenRouter, allowing you to seamlessly swap between models optimized for math (Qwen), academia (Owl Alpha), or coding (Laguna).
+*   **Native Markdown Rendering:** Chat bubbles and reasoning outputs natively parse LLM Markdown into clean HTML (bolding, lists, code blocks).
+*   **Anti-Inception Capture:** The UI overlay automatically hides itself in a fraction of a millisecond during screen capture to prevent the AI from "reading" its own UI elements.
 *   **Chrome Extension Version:** A lightweight Manifest V3 Chrome Extension version of the DOM analyzer, ready for unlisted publishing.
 *   **Local Autonomous Loop (`src/main.js`):** An automated loop that navigates a local test quiz, continuously identifying questions, selecting the best AI-determined answer, and auto-clicking the "Next" button.
 
@@ -44,9 +47,10 @@ This project explores the security boundaries of online assessments by highlight
    ```
 
 4. **Configure your API Key:**
-   Create a `.env` file in the root of the project and add your Gemini API key:
+   Create a `.env` file in the root of the project and add your API keys:
    ```env
-   GEMINI_API_KEY=your_actual_api_key_here
+   GEMINI_API_KEY=your_actual_gemini_key_here
+   OPENROUTER_API_KEY=sk-or-v1-your_openrouter_key_here
    ```
 
 ---
