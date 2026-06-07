@@ -9,7 +9,6 @@ require('dotenv').config({ path: globalEnvPath }); // Load global keys if they e
 
 const { chromium } = require('playwright');
 const readline = require('readline');
-const path = require('path');
 const OCRLayer = require('./ocr');
 const AILayer = require('./ai');
 const { marked } = require('marked');
