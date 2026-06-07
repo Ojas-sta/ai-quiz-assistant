@@ -49,12 +49,17 @@ OpenRouter gives you access to hundreds of open-source models, including powerfu
 You do not need to download the code to use the assistant! It has been published globally to the NPM registry.
 
 1. **Ensure Node.js is installed:** Make sure you have [Node.js](https://nodejs.org/) (v18+) installed on your machine.
-2. **Run the universal command:**
+2. **Install Playwright Browsers (One-time setup):**
+   Because the assistant uses a hidden browser to read and analyze quizzes, you need to install the browser engine first:
+   ```bash
+   npx playwright install chromium
+   ```
+3. **Run the universal command:**
    Open your terminal and type:
    ```bash
    npx ai-quiz-assistant@latest https://google.com
    ```
-3. **Interactive Setup:** On your very first run, the tool will automatically pause and ask you to paste the API keys you generated above. It securely saves them so you never have to enter them again!
+4. **Interactive Setup:** On your very first run, the tool will automatically pause and ask you to paste the API keys you generated above. It securely saves them so you never have to enter them again!
 
 ---
 
