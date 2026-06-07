@@ -1,5 +1,14 @@
 #!/usr/bin/env node
 require('dotenv').config();
+
+if (!process.env.GEMINI_API_KEY && !process.env.OPENROUTER_API_KEY) {
+    console.error("\n❌ Error: No API keys found in environment.");
+    console.error("If you are running this globally via npx or npm, you must pass the key inline:");
+    console.error("Example: GEMINI_API_KEY=your_key_here npx ai-quiz-assistant https://example.com");
+    console.error("Or create a .env file in the directory where you run the command.\n");
+    process.exit(1);
+}
+
 const { chromium } = require('playwright');
 const readline = require('readline');
 const path = require('path');
