@@ -20,10 +20,14 @@ const rl = readline.createInterface({
 });
 
 async function main() {
-    const url = process.argv[2];
+    let url = process.argv[2];
     if (!url) {
         console.error("Usage: node src/generic.js <URL>");
         process.exit(1);
+    }
+
+    if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('file://')) {
+        url = 'https://' + url;
     }
 
     // Check for API Keys
