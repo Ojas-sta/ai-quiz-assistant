@@ -1,8 +1,12 @@
 {
-  "name": "quiz-vulnerability-analysis-simulator",
+  "name": "ai-quiz-assistant",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "An educational vulnerability simulator and AI Assistant overlay for quizzes.",
+  "main": "src/generic.js",
+  "bin": {
+    "ai-quiz-assistant": "./src/generic.js",
+    "ai-quiz-simulator": "./src/main.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

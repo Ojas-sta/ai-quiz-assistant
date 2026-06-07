@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 require('dotenv').config();
 const { chromium } = require('playwright');
 const readline = require('readline');
