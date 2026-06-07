@@ -20,38 +20,41 @@ This project explores the security boundaries of online assessments by highlight
 
 ---
 
-## 🛠️ Prerequisites
+## 🔑 Getting Your API Keys (Required)
 
-*   [Node.js](https://nodejs.org/) (v16+ recommended)
-*   A [Google Gemini API Key](https://aistudio.google.com/app/apikey)
+To power the AI analysis, you will need at least one API key. You can get both entirely for free!
+
+### 1. Google Gemini API Key (Recommended for General Use)
+Gemini 2.5 Flash is incredibly fast, smart, and provides a very generous free tier.
+*   **Link:** [Google AI Studio API Keys](https://aistudio.google.com/app/apikey)
+*   **How to get it:**
+    1. Click the link above and sign in with your Google Account.
+    2. Click the blue **"Create API key"** button on the screen.
+    3. Select a project (or create a new one) and generate the key.
+    4. Copy your key (it usually starts with `AIza...`).
+
+### 2. OpenRouter API Key (Recommended for Specialized Models)
+OpenRouter gives you access to hundreds of open-source models, including powerful free models specifically optimized for Math (Qwen) and Academia (Owl Alpha).
+*   **Link:** [OpenRouter API Keys](https://openrouter.ai/settings/keys)
+*   **How to get it:**
+    1. Create a free account on OpenRouter.
+    2. Navigate to your settings and click **"Create Key"**.
+    3. Give the key a name (e.g., "Quiz Assistant").
+    4. Copy the key (it starts with `sk-or-v1-...`). *Note: Make sure you copy it immediately, as it is only shown once!*
 
 ---
 
 ## 📦 Setup & Installation
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Ojas-sta/ai-quiz-assistant.git
-   cd ai-quiz-assistant
-   ```
+You do not need to download the code to use the assistant! It has been published globally to the NPM registry.
 
-2. **Install Node dependencies:**
-   This will install Playwright, Tesseract.js, Jimp, and the Google Gen AI SDK.
+1. **Ensure Node.js is installed:** Make sure you have [Node.js](https://nodejs.org/) (v18+) installed on your machine.
+2. **Run the universal command:**
+   Open your terminal and type:
    ```bash
-   npm install
+   npx ai-quiz-assistant@latest https://google.com
    ```
-
-3. **Install Playwright Browsers:**
-   ```bash
-   npx playwright install chromium
-   ```
-
-4. **Configure your API Key:**
-   Create a `.env` file in the root of the project and add your API keys:
-   ```env
-   GEMINI_API_KEY=your_actual_gemini_key_here
-   OPENROUTER_API_KEY=sk-or-v1-your_openrouter_key_here
-   ```
+3. **Interactive Setup:** On your very first run, the tool will automatically pause and ask you to paste the API keys you generated above. It securely saves them so you never have to enter them again!
 
 ---
 
@@ -61,7 +64,7 @@ This project explores the security boundaries of online assessments by highlight
 This mode launches a custom browser, navigates to a URL you specify, and injects our custom AI Assistant overlay into the page.
 
 ```bash
-node src/generic.js "https://example-quiz-site.com/login"
+npx ai-quiz-assistant@latest "https://example-quiz-site.com/login"
 ```
 *   **How to use:** Navigate the browser manually (log in, pass captchas, etc.). When a question is on screen, click either the **DOM** or **OCR** analyze buttons in the floating overlay.
 *   **Chat:** After an analysis, a chat window will slide down allowing you to interrogate the AI about its answer.
