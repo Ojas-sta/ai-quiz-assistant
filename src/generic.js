@@ -70,16 +70,26 @@ async function main() {
             await currentPage.evaluate(() => {
                 if (document.getElementById('ai-reasoning-overlay')) return;
                 
+                const container = document.createElement('div');
+                container.id = 'ai-assistant-container';
+                container.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 2147483647; font-family: sans-serif;';
+
+                const restoreBtn = document.createElement('button');
+                restoreBtn.id = 'ai-restore-btn';
+                restoreBtn.style.cssText = 'display: none; padding: 12px 16px; background: #4caf50; color: white; border: none; cursor: pointer; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.5);';
+                restoreBtn.innerText = '🤖 Show AI';
+
                 const overlay = document.createElement('div');
                 overlay.id = 'ai-reasoning-overlay';
                 overlay.style.cssText = `
-                    position: fixed; bottom: 20px; right: 20px; width: 350px;
+                    width: 350px;
                     background-color: #1e1e1e; color: #f0f0f0; padding: 20px;
                     border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-                    z-index: 2147483647; font-family: sans-serif; border: 1px solid #444;
+                    border: 1px solid #444; position: relative;
                 `;
                 overlay.innerHTML = `
-                    <h3 style="margin-top: 0; color: #4caf50;">AI Assistant</h3>
+                    <button id="ai-hide-btn" style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; color: #aaa; cursor: pointer; font-size: 16px;">✖</button>
+                    <h3 style="margin-top: 0; margin-bottom: 15px; color: #4caf50;">AI Assistant</h3>
                     <select id="ai-model-select" style="width: 100%; padding: 8px; margin-bottom: 8px; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 4px;">
                         <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                         <option value="openrouter/owl-alpha">Owl Alpha (Academia)</option>
@@ -98,7 +108,20 @@ async function main() {
                         </div>
                     </div>
                 `;
-                document.body.appendChild(overlay);
+                container.appendChild(restoreBtn);
+                container.appendChild(overlay);
+                document.body.appendChild(container);
+
+                // Setup Hide/Show Logic
+                document.getElementById('ai-hide-btn').addEventListener('click', () => {
+                    overlay.style.display = 'none';
+                    restoreBtn.style.display = 'block';
+                });
+                
+                restoreBtn.addEventListener('click', () => {
+                    restoreBtn.style.display = 'none';
+                    overlay.style.display = 'block';
+                });
 
                 // Setup DOM Button
                 document.getElementById('ai-analyze-dom-btn').addEventListener('click', async () => {
