@@ -4,6 +4,7 @@ const readline = require('readline');
 const path = require('path');
 const OCRLayer = require('./ocr');
 const AILayer = require('./ai');
+const { marked } = require('marked');
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -42,6 +43,9 @@ async function main() {
         } else {
             console.log(`\n--- Extracted OCR Text ---\n${ocrResult.question}`);
             const answer = await currentAILayer.determineAnswer(ocrResult.question, ocrResult.options);
+            if (answer && answer.reasoning) {
+                answer.reasoning = marked.parse(answer.reasoning);
+            }
             return answer || { error: "AI failed to generate an answer." };
         }
     });
@@ -56,12 +60,16 @@ async function main() {
         console.log(`\n--- Extracted DOM Text ---\n${pageText.substring(0, 300)}...`);
         // We pass the raw text as the question and an empty array for options.
         const answer = await currentAILayer.determineAnswer(pageText.substring(0, 5000), []);
+        if (answer && answer.reasoning) {
+            answer.reasoning = marked.parse(answer.reasoning);
+        }
         return answer || { error: "AI failed to generate an answer." };
     });
 
     // 1c. Expose a function for Chat interaction
     await page.exposeFunction('triggerNodeChat', async (message) => {
-        return await currentAILayer.chat(message);
+        const response = await currentAILayer.chat(message);
+        return marked.parse(response);
     });
 
     // 2. Inject the UI overlay every time the page finishes loading or navigating
