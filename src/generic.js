@@ -134,10 +134,23 @@ async function main() {
     // 2. Inject the UI overlay automatically on every navigation, redirect, or SPA route change
     await page.addInitScript(() => {
         function injectQalifyOverlay() {
-            if (window.top !== window) return; // Only run in the main frame
+            let isMain = false;
+            try {
+                if (window.top === window) {
+                    if (document.body && document.body.tagName.toUpperCase() !== 'FRAMESET') isMain = true;
+                } else {
+                    if (window.top.document.body && window.top.document.body.tagName.toUpperCase() === 'FRAMESET') {
+                        if (window.innerWidth > 300 && window.innerHeight > 300) isMain = true;
+                    }
+                }
+            } catch (e) {
+                // Cross-origin iframe fallback
+                if (window.innerWidth > 400 && window.innerHeight > 400) isMain = true;
+            }
+
+            if (!isMain) return;
             if (document.getElementById('ai-reasoning-overlay')) return;
             if (!document.body) return; // Wait until body is ready
-            
                 
                 const container = document.createElement('div');
                 container.id = 'ai-assistant-container';
