@@ -7,12 +7,14 @@
 - **Universal Overlay:** Generic Playwright UI overlay injection for testing on any website.
 - **Interactive Chat:** In-browser LLM Chatbot via Playwright function exposure.
 - **Multi-Model Support:** OpenRouter API integration supporting Academic/Code/Math specific models (Owl Alpha, Qwen, Laguna).
+- **Native Anthropic Integration:** Direct support for Claude 4.5 models via the official Anthropic SDK.
+- **Advanced Key Management:** Support for up to 3 different Gemini keys securely stored locally via `.env` file and selectable directly from the UI dropdown.
 - **Beautiful Output:** Native Markdown formatting for AI reasoning using `marked`.
 - **Robust Parsing:** Heuristic fallback for non-JSON conversational models (like Owl Alpha).
 - **Anti-Inception Capture:** Overlay auto-hides during DOM/Screenshot capture to prevent the AI from reading its own UI.
 
 ## 🚀 Planned Features
-- [ ] Add support for Anthropic Claude models.
+- [x] Add support for Anthropic Claude models.
 - [ ] Implement local, offline LLM support via Ollama.
 - [ ] Add visual bounding boxes to highlight extracted question elements on the screen.
 - [ ] Export chat logs and analysis history to Markdown files.

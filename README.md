@@ -15,7 +15,8 @@ This project explores the security boundaries of online assessments by highlight
     *   **Analyze (DOM):** Instantly extracts the text from standard HTML web pages.
     *   **Analyze (OCR):** Takes a background screenshot, sharpens the image, and runs it through Tesseract.js to defeat anti-scraping canvas/image obfuscation.
 *   **Interactive AI Chatbot:** After extracting a question, the UI allows you to chat directly with the AI to ask follow-up questions or have it explain its reasoning.
-*   **Multi-Model Support:** Integrates with both Google Gemini and OpenRouter, allowing you to seamlessly swap between models optimized for math (Qwen), academia (Owl Alpha), or coding (Laguna).
+*   **Multi-Model Support:** Integrates natively with Google Gemini, Anthropic Claude, and OpenRouter, allowing you to seamlessly swap between models optimized for math (Qwen), academia (Owl Alpha), or coding (Laguna).
+*   **Advanced Key Management:** Configure up to 3 separate Gemini API keys in your `.env` file and hot-swap between them directly from the UI widget to effortlessly bypass rate limits.
 *   **Native Markdown Rendering:** Chat bubbles and reasoning outputs natively parse LLM Markdown into clean HTML (bolding, lists, code blocks).
 *   **Anti-Inception Capture:** The UI overlay automatically hides itself in a fraction of a millisecond during screen capture to prevent the AI from "reading" its own UI elements.
 *   **Terminal ASCII Art & Delay:** Features a sleek boot-up ASCII banner and a 3-second safety delay before the browser launches.
@@ -29,7 +30,7 @@ This project explores the security boundaries of online assessments by highlight
 To power the AI analysis, you will need at least one API key. You can get both entirely for free!
 
 ### 1. Google Gemini API Key (Recommended for General Use)
-Gemini 2.5 Flash is incredibly fast, smart, and provides a very generous free tier.
+Gemini 2.5 Flash is incredibly fast, smart, and provides a very generous free tier. Qalify+ supports up to 3 separate Gemini keys stored locally in your `.env` file!
 *   **Link:** [Google AI Studio API Keys](https://aistudio.google.com/app/apikey)
 *   **How to get it:**
     1. Click the link above and sign in with your Google Account.
@@ -45,6 +46,10 @@ OpenRouter gives you access to hundreds of open-source models, including powerfu
     2. Navigate to your settings and click **"Create Key"**.
     3. Give the key a name (e.g., "Quiz Assistant").
     4. Copy the key (it starts with `sk-or-v1-...`). *Note: Make sure you copy it immediately, as it is only shown once!*
+
+### 3. Anthropic API Key (Recommended for Advanced Logic)
+Anthropic's latest Claude 4.5 models (Haiku and Sonnet) provide incredible reasoning capabilities for complex problems.
+*   **Link:** [Anthropic Console](https://console.anthropic.com/)
 
 ---
 
