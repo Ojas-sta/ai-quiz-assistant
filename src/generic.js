@@ -131,11 +131,13 @@ async function main() {
         return marked.parse(response);
     });
 
-    // 2. Inject the UI overlay every time the page finishes loading or navigating
-    page.on('domcontentloaded', async (currentPage) => {
-        try {
-            await currentPage.evaluate(() => {
-                if (document.getElementById('ai-reasoning-overlay')) return;
+    // 2. Inject the UI overlay automatically on every navigation, redirect, or SPA route change
+    await page.addInitScript(() => {
+        function injectQalifyOverlay() {
+            if (window.top !== window) return; // Only run in the main frame
+            if (document.getElementById('ai-reasoning-overlay')) return;
+            if (!document.body) return; // Wait until body is ready
+            
                 
                 const container = document.createElement('div');
                 container.id = 'ai-assistant-container';
@@ -333,10 +335,12 @@ async function main() {
                 chatInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') handleChat();
                 });
-            });
-        } catch (e) {
-            // Ignore frame injection errors during navigation
         }
+
+        // Trigger on load
+        window.addEventListener('DOMContentLoaded', injectQalifyOverlay);
+        // Robust fallback for SPA routing or aggressive DOM replacements (like React)
+        setInterval(injectQalifyOverlay, 1000);
     });
 
     await page.goto(url);
