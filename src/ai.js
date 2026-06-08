@@ -2,9 +2,10 @@ const { GoogleGenAI, Type } = require('@google/genai');
 const { OpenAI } = require('openai');
 
 class AILayer {
-    constructor(providerName = 'gemini', modelName = 'gemini-2.5-flash') {
+    constructor(providerName = 'gemini', modelName = 'gemini-2.5-flash', keyIndex = "1") {
         this.providerName = providerName;
         this.modelName = modelName;
+        this.keyIndex = keyIndex;
         this.isOpenRouter = (this.providerName === 'openrouter');
         this.isPuter = (this.providerName === 'puter');
         
@@ -23,7 +24,19 @@ class AILayer {
             this.puter = require('@heyputer/puter.js').puter;
             this.chatHistory = [];
         } else {
-            const key = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim().replace(/^["']|["']$/g, '') : undefined;
+            let envKeyName = 'GEMINI_API_KEY';
+            if (this.keyIndex && this.keyIndex !== "1") {
+                envKeyName = `GEMINI_API_KEY_${this.keyIndex}`;
+            }
+            let key = process.env[envKeyName] ? process.env[envKeyName].trim().replace(/^["']|["']$/g, '') : undefined;
+            
+            // Fallback to default key if the specific indexed key doesn't exist
+            if (!key && this.keyIndex !== "1") {
+                console.log(`[AI] ${envKeyName} not found, falling back to GEMINI_API_KEY`);
+                key = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim().replace(/^["']|["']$/g, '') : undefined;
+            }
+
+            this.geminiKey = key;
             this.ai = new GoogleGenAI({ apiKey: key });
             this.chatSession = null;
         }
@@ -139,12 +152,12 @@ Return your answer as a structured JSON object. Use exactly these keys:
 
             } else {
                 // Google Gemini API natively
-                if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is missing from .env");
+                if (!this.geminiKey) throw new Error("A GEMINI_API_KEY is missing from .env");
 
                 if (base64Image) {
                     // Use the new Standalone Multimodal Pipeline!
                     const GeminiPipeline = require('./gemini-pipeline');
-                    const pipeline = new GeminiPipeline();
+                    const pipeline = new GeminiPipeline(this.geminiKey);
                     
                     const questionHint = `Question: ${questionText}\nOptions: ${optionsText.join(', ')}`;
                     parsed = await pipeline.execute(base64Image, questionHint, this.modelName);

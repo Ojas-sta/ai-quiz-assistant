@@ -70,8 +70,8 @@ async function main() {
     let currentAILayer = new AILayer();
 
     // 1. Expose a function so the browser UI can trigger the Node.js OCR pipeline
-    await page.exposeFunction('triggerNodeOCR', async (providerName, modelName) => {
-        currentAILayer = new AILayer(providerName || 'gemini', modelName || 'gemini-2.5-flash');
+    await page.exposeFunction('triggerNodeOCR', async (providerName, modelName, keyIndex) => {
+        currentAILayer = new AILayer(providerName || 'gemini', modelName || 'gemini-2.5-flash', keyIndex);
         console.log(`\n[Overlay] 'Analyze' button clicked! Model: ${currentAILayer.modelName}`);
         
         // Hide the overlay so it isn't captured in the screenshot
@@ -110,8 +110,8 @@ async function main() {
     });
 
     // 1b. Expose a function for DOM text extraction
-    await page.exposeFunction('triggerNodeDOM', async (pageText, providerName, modelName) => {
-        currentAILayer = new AILayer(providerName || 'gemini', modelName || 'gemini-2.5-flash');
+    await page.exposeFunction('triggerNodeDOM', async (pageText, providerName, modelName, keyIndex) => {
+        currentAILayer = new AILayer(providerName || 'gemini', modelName || 'gemini-2.5-flash', keyIndex);
         console.log(`\n[Overlay] 'Analyze (DOM)' button clicked! Model: ${currentAILayer.modelName}`);
         if (!pageText || pageText.trim() === '') {
             return { error: "No text found in DOM." };
@@ -164,6 +164,11 @@ async function main() {
                     </select>
                     <select id="ai-model-select" style="width: 100%; height: 36px; padding-left: 8px; margin-bottom: 8px; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 4px; font-size: 14px; box-sizing: border-box; cursor: pointer;">
                         <!-- Options injected by JS -->
+                    </select>
+                    <select id="ai-key-select" style="width: 100%; height: 36px; padding-left: 8px; margin-bottom: 8px; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 4px; font-size: 14px; box-sizing: border-box; cursor: pointer; display: none;">
+                        <option value="1">Gemini Key 1 (Default)</option>
+                        <option value="2">Gemini Key 2</option>
+                        <option value="3">Gemini Key 3</option>
                     </select>
                     <button id="ai-analyze-dom-btn" style="width: 100%; padding: 10px; background: #2196F3; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; margin-bottom: 8px;">Analyze Screen (DOM)</button>
                     <button id="ai-analyze-ocr-btn" style="width: 100%; padding: 10px; background: #4caf50; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold;">Analyze Screen (OCR)</button>
@@ -218,8 +223,11 @@ async function main() {
                     ]
                 };
 
+                const keySelect = document.getElementById('ai-key-select');
+
                 providerSelect.addEventListener('change', () => {
                     modelSelect.innerHTML = providerModels[providerSelect.value].join('');
+                    keySelect.style.display = providerSelect.value === 'gemini' ? 'block' : 'none';
                 });
                 
                 // Init defaults
@@ -231,6 +239,7 @@ async function main() {
                     const resultDiv = document.getElementById('ai-result');
                     const providerName = providerSelect.value;
                     const modelName = modelSelect.value;
+                    const keyIndex = keySelect.style.display !== 'none' ? keySelect.value : "1";
                     
                     resultDiv.style.display = 'block';
                     resultDiv.innerHTML = "<em>Analyzing DOM...</em>";
@@ -239,7 +248,7 @@ async function main() {
 
                     try {
                         const pageText = document.body.innerText;
-                        const answer = await window.triggerNodeDOM(pageText, providerName, modelName);
+                        const answer = await window.triggerNodeDOM(pageText, providerName, modelName, keyIndex);
                         if (answer.error) {
                             resultDiv.innerHTML = `<div style="color: red;">${answer.error}</div>`;
                         } else {
@@ -262,6 +271,7 @@ async function main() {
                     const resultDiv = document.getElementById('ai-result');
                     const providerName = providerSelect.value;
                     const modelName = modelSelect.value;
+                    const keyIndex = keySelect.style.display !== 'none' ? keySelect.value : "1";
                     
                     resultDiv.style.display = 'block';
                     resultDiv.innerHTML = "<em>Taking screenshot & running OCR...</em>";
@@ -269,7 +279,7 @@ async function main() {
                     document.getElementById('ai-analyze-ocr-btn').disabled = true;
 
                     try {
-                        const answer = await window.triggerNodeOCR(providerName, modelName);
+                        const answer = await window.triggerNodeOCR(providerName, modelName, keyIndex);
                         if (answer.error) {
                             resultDiv.innerHTML = `<div style="color: red;">${answer.error}</div>`;
                         } else {

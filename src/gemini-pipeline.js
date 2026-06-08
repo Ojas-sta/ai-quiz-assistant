@@ -2,8 +2,8 @@ const Jimp = require('jimp');
 const { GoogleGenAI } = require('@google/genai');
 
 class GeminiPipeline {
-    constructor() {
-        const key = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim().replace(/^["']|["']$/g, '') : undefined;
+    constructor(customKey) {
+        const key = customKey || (process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim().replace(/^["']|["']$/g, '') : undefined);
         this.ai = new GoogleGenAI({ apiKey: key });
     }
 
