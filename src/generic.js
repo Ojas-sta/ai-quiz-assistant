@@ -160,6 +160,7 @@ async function main() {
                     <select id="ai-provider-select" style="width: 100%; height: 36px; padding-left: 8px; margin-bottom: 8px; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 4px; font-size: 14px; box-sizing: border-box; cursor: pointer;">
                         <option value="openrouter">OpenRouter</option>
                         <option value="gemini">Google Gemini</option>
+                        <option value="anthropic">Anthropic Native</option>
                         <option value="puter">Puter.js (Free Claude)</option>
                     </select>
                     <select id="ai-model-select" style="width: 100%; height: 36px; padding-left: 8px; margin-bottom: 8px; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 4px; font-size: 14px; box-sizing: border-box; cursor: pointer;">
@@ -215,6 +216,10 @@ async function main() {
                         '<option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>',
                         '<option value="gemini-2.5-flash">Gemini 2.5 Flash</option>',
                         '<option value="gemini-1.5-pro">Gemini 1.5 Pro</option>'
+                    ],
+                    'anthropic': [
+                        '<option value="claude-4-5-haiku-latest">Claude Haiku 4.5</option>',
+                        '<option value="claude-4-5-sonnet-latest">Claude Sonnet 4.5</option>'
                     ],
                     'puter': [
                         '<option value="claude-sonnet-4-6">Claude Sonnet 4.6</option>',

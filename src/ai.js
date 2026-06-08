@@ -1,5 +1,6 @@
 const { GoogleGenAI, Type } = require('@google/genai');
 const { OpenAI } = require('openai');
+const Anthropic = require('@anthropic-ai/sdk');
 
 class AILayer {
     constructor(providerName = 'gemini', modelName = 'gemini-2.5-flash', keyIndex = "1") {
@@ -8,6 +9,7 @@ class AILayer {
         this.keyIndex = keyIndex;
         this.isOpenRouter = (this.providerName === 'openrouter');
         this.isPuter = (this.providerName === 'puter');
+        this.isAnthropic = (this.providerName === 'anthropic');
         
         if (this.isOpenRouter) {
             const key = process.env.OPENROUTER_API_KEY ? process.env.OPENROUTER_API_KEY.trim().replace(/^["']|["']$/g, '') : undefined;
@@ -22,6 +24,10 @@ class AILayer {
             this.chatHistory = [];
         } else if (this.isPuter) {
             this.puter = require('@heyputer/puter.js').puter;
+            this.chatHistory = [];
+        } else if (this.isAnthropic) {
+            const key = process.env.ANTHROPIC_API_KEY ? process.env.ANTHROPIC_API_KEY.trim().replace(/^["']|["']$/g, '') : undefined;
+            this.anthropic = new Anthropic({ apiKey: key });
             this.chatHistory = [];
         } else {
             let envKeyName = 'GEMINI_API_KEY';
@@ -150,6 +156,55 @@ Return your answer as a structured JSON object. Use exactly these keys:
                     { role: "assistant", content: `I chose Option ${parsed.selectedOption} with ${parsed.confidenceScore}% confidence because: ${parsed.reasoning}.` }
                 ];
 
+            } else if (this.isAnthropic) {
+                // Anthropic Native API
+                if (!process.env.ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY is missing from .env");
+                
+                const messages = [];
+                if (base64Image) {
+                    messages.push({
+                        role: "user",
+                        content: [
+                            { type: "image", source: { type: "base64", media_type: "image/png", data: base64Image } },
+                            { type: "text", text: userPrompt + "\nEnsure you output ONLY valid JSON. No markdown formatting." }
+                        ]
+                    });
+                } else {
+                    messages.push({ role: "user", content: userPrompt + "\nEnsure you output ONLY valid JSON. No markdown formatting." });
+                }
+
+                const response = await this.anthropic.messages.create({
+                    model: this.modelName,
+                    max_tokens: 1000,
+                    system: systemPrompt,
+                    messages: messages
+                });
+
+                const resultText = response.content[0].text;
+                let cleanText = resultText.replace(/```json/gi, '').replace(/```/gi, '').trim();
+                
+                try {
+                    const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        parsed = JSON.parse(jsonMatch[0]);
+                    } else {
+                        parsed = JSON.parse(cleanText);
+                    }
+                } catch (e) {
+                    console.log(`[AI] JSON parse failed, attempting heuristic fallback on: ${cleanText.substring(0, 50)}...`);
+                    const optMatch = cleanText.match(/Option\s*([A-D])/i) || cleanText.match(/\b([A-D])\b/);
+                    if (!optMatch) throw new Error(`Model did not return JSON. Raw output: ${cleanText.substring(0, 100)}...`);
+                    parsed = { selectedOption: optMatch[1].toUpperCase(), confidenceScore: 85, reasoning: cleanText };
+                }
+
+                this.chatHistory = [
+                    { role: "user", content: `Question: ${questionText}\nOptions: ${optionsText.join(', ')}` },
+                    { role: "assistant", content: `I chose Option ${parsed.selectedOption} with ${parsed.confidenceScore}% confidence because: ${parsed.reasoning}.` }
+                ];
+                
+                // Store system prompt separately for chat
+                this.anthropicSystemPrompt = systemPrompt;
+
             } else {
                 // Google Gemini API natively
                 if (!this.geminiKey) throw new Error("A GEMINI_API_KEY is missing from .env");
@@ -241,6 +296,20 @@ Return your answer as a structured JSON object. Use exactly these keys:
                 });
                 
                 const reply = response.choices[0].message.content;
+                this.chatHistory.push({ role: "assistant", content: reply });
+                return reply;
+            } else if (this.isAnthropic) {
+                if (this.chatHistory.length === 0) return "I am not analyzing a question right now.";
+                
+                this.chatHistory.push({ role: "user", content: message });
+                const response = await this.anthropic.messages.create({
+                    model: this.modelName,
+                    max_tokens: 1000,
+                    system: this.anthropicSystemPrompt || "You are a helpful AI assistant.",
+                    messages: this.chatHistory
+                });
+                
+                const reply = response.content[0].text;
                 this.chatHistory.push({ role: "assistant", content: reply });
                 return reply;
             } else {
